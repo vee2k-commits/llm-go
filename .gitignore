@@ -7,3 +7,6 @@ vee-bin
 # Temp clone directories
 .tmp-llm-go-clone/
 .tmp-*/
+
+# Vendored design reference (not part of the shipped product)
+hallmark-main/

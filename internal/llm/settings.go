@@ -69,7 +69,7 @@ func DefineSettings(cfg *config.Store) {
 		Group:       "llm",
 		Label:       "OpenAI model",
 		Type:        config.TypeString,
-		Default:     "",
+		Default:     DefaultOpenAIModel,
 		Description: "Model name to request from the OpenAI-compatible endpoint.",
 	})
 	cfg.Define(config.Setting{

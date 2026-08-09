@@ -1,0 +1,237 @@
+/* ============================================================================
+ * vee-style.css — Vee Arcade chrome styles (DESIGN-BIBLE §3e)
+ *
+ * Doctrine: cream paper, plum ink, pill buttons that physically press into
+ * the paper, washi-tape panels, 18px floor, tabular-nums scores.
+ * Offline requirement: NO external font downloads — Baloo 2 / Fredoka are
+ * first choice (if locally installed) with rounded-system fallbacks only.
+ *
+ * BANNED here (hard): purple gradients, glassmorphism, browser-default
+ * `ease`, `transition: all`, Inter/Roboto/Poppins, pure #000/#fff.
+ * ========================================================================== */
+
+:root {
+  /* §3a — "Violet's Workshop" tokens (same values as vee-game.js DESIGN) */
+  --paper:   #FFF6E4;
+  --paper-2: #F7E9CE;
+  --paper-3: #EDDAB6;
+  --ink:     #3A2B46;
+  --ink-soft: #5C4A6E;
+  --violet:  #8A5BD6;
+  --sun:     #FFB63D;
+  --leaf:    #4FBE6A;
+  --berry:   #E0503C;
+  --sky:     #7EB8F0;
+
+  /* §3e — two families total (2+1 rule); rounded-system fallback stack */
+  --font-display: "Baloo 2", "Fredoka", "Comic Sans MS", "Chalkboard SE",
+                  "Comic Neue", "Segoe UI", system-ui, sans-serif;
+  --font-body:    "Fredoka", "Baloo 2", "Comic Sans MS", "Chalkboard SE",
+                  "Comic Neue", "Segoe UI", system-ui, sans-serif;
+
+  /* §3e — perfect-fourth scale from 18px base (kids' floor) */
+  --text-xs: 18px;
+  --text-sm: 24px;
+  --text-md: 32px;
+  --text-lg: 43px;
+  --text-xl: 57px;
+
+  /* §3b — named easings ONLY (browser `ease` is banned) */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --pop:         cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* §3b — timing canon */
+  --t-instant: 100ms;
+  --t-short:   180ms;
+  --t-medium:  280ms;
+  --t-long:    450ms;
+
+  --shadow-sticker: 3px 3px 0 rgba(58, 43, 70, 0.9);
+  --radius-panel: 16px;
+}
+
+/* ---------------------------------------------------------------- base --- */
+.vee,
+.vee * { box-sizing: border-box; }
+
+.vee {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);              /* 18px floor everywhere */
+  line-height: 1.4;
+}
+
+.vee h1, .vee h2, .vee .vee-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+.vee h1 { font-size: var(--text-lg); }
+.vee h2 { font-size: var(--text-md); }
+
+.vee .vee-nums,
+.vee .vee-score {
+  font-variant-numeric: tabular-nums;     /* §3e score gate */
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------- panels -- */
+.vee-panel {
+  position: relative;
+  background: var(--paper-2);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sticker);
+  padding: 24px;
+}
+
+/* washi-tape corner accents (alpha 0.6, asymmetric ±4° rotation) */
+.vee-panel--taped::before,
+.vee-panel--taped::after {
+  content: "";
+  position: absolute;
+  width: 64px;
+  height: 20px;
+  background: var(--violet);
+  opacity: 0.6;
+  border-radius: 3px;
+}
+.vee-panel--taped::before { top: -10px; left: 18px;  transform: rotate(-4deg); }
+.vee-panel--taped::after  { bottom: -10px; right: 18px; transform: rotate(3deg); }
+
+/* -------------------------------------------------------------- buttons -- */
+.vee-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  min-height: 56px;                       /* §3e: raised target for small hands */
+  padding: 10px 28px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--sun);
+  border: 2px solid var(--ink);
+  border-radius: 999px;                   /* pill */
+  box-shadow: var(--shadow-sticker);
+  cursor: pointer;
+  user-select: none;
+  /* named easing + specific properties only — `ease`/`all` banned */
+  transition: transform var(--t-instant) var(--ease-out),
+              box-shadow var(--t-instant) var(--ease-out),
+              background-color var(--t-short) var(--ease-out);
+}
+.vee-btn:hover { background: #FFC65E; }
+.vee-btn:active,
+.vee-btn.is-pressed {
+  transform: translate(3px, 3px);         /* presses INTO the paper */
+  box-shadow: 0 0 0 rgba(58, 43, 70, 0);
+  transition-duration: 90ms;              /* §3c: button press = instant bucket */
+}
+.vee-btn--violet { background: var(--violet); color: #FFF6E4; }
+.vee-btn--violet:hover { background: #9A6FE0; }
+.vee-btn--leaf   { background: var(--leaf); }
+.vee-btn--berry  { background: var(--berry); color: #FFF6E4; }
+.vee-btn--ghost  { background: var(--paper-2); }
+
+/* focus rings: instant, ≥3:1, never animated (§3e chrome rules) */
+.vee-btn:focus-visible,
+.vee a:focus-visible,
+.vee input:focus-visible {
+  outline: 3px solid var(--violet);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- overlays - */
+.vee-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(58, 43, 70, 0.35);     /* plum tint, never pure black */
+  z-index: 30;
+}
+
+.vee-card {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-panel);
+  box-shadow: 4px 4px 0 rgba(58, 43, 70, 0.9);
+  padding: 32px 40px;
+  text-align: center;
+  max-width: min(560px, 88%);
+  animation: vee-card-in var(--t-medium) var(--pop) both;  /* 0.9→1.0 + rise */
+}
+@keyframes vee-card-in {
+  from { transform: translateY(14px) scale(0.9); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);   opacity: 1; }
+}
+.vee-card.is-leaving {
+  animation: vee-card-out calc(var(--t-medium) * 0.75) var(--ease-in) both; /* exit = 75% */
+}
+@keyframes vee-card-out {
+  from { transform: translateY(0) scale(1);      opacity: 1; }
+  to   { transform: translateY(10px) scale(0.94); opacity: 0; }
+}
+
+/* -------------------------------------------------------------- badges --- */
+.vee-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--paper-3);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+.vee-badge--sun  { background: var(--sun); }
+.vee-badge--leaf { background: var(--leaf); }
+
+/* --------------------------------------------------------------- sliders - */
+.vee-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 12px;
+  background: var(--paper-3);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+.vee-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--violet);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 rgba(58, 43, 70, 0.9);
+  cursor: pointer;
+}
+.vee-range::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--violet);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 rgba(58, 43, 70, 0.9);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------- reduced-motion fallback - */
+@media (prefers-reduced-motion: reduce) {
+  .vee-card,
+  .vee-card.is-leaving { animation: none; }
+  .vee-btn { transition: none; }
+}

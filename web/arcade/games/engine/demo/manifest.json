@@ -1,0 +1,10 @@
+{
+  "id": "engine-demo",
+  "title": "Vee Engine Demo",
+  "genre": "Tech Demo",
+  "engine": "html5",
+  "entry": "index.html",
+  "demo": "",
+  "license": "MIT",
+  "source": ""
+}

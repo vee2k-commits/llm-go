@@ -11,6 +11,11 @@ import (
 	"sync"
 )
 
+// DefaultOpenAIModel is the model requested from the OpenAI-compatible
+// endpoint whenever llm.openai.model is unset or persisted as an empty
+// string (an empty override in vee.db must not mask the default).
+const DefaultOpenAIModel = "oc/big-pickle"
+
 // OpenAIOpts configures the generic OpenAI-compatible backend. It speaks the
 // same streaming protocol as llamacpp (OpenAI chat completions SSE), so it
 // works against api.openai.com or any compatible endpoint.
@@ -30,9 +35,14 @@ type OpenAIBackend struct {
 
 // NewOpenAIBackend builds the backend. BaseURL defaults to
 // http://localhost:20128/v1 (the local OpenAI-compatible proxy) when empty.
+// Model defaults to DefaultOpenAIModel when empty so a blank (or blank
+// persisted) llm.openai.model never produces a "Missing model" request.
 func NewOpenAIBackend(opts OpenAIOpts) *OpenAIBackend {
 	if opts.BaseURL == "" {
 		opts.BaseURL = "http://localhost:20128/v1"
+	}
+	if opts.Model == "" {
+		opts.Model = DefaultOpenAIModel
 	}
 	return &OpenAIBackend{
 		opts: opts,
