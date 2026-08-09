@@ -15,6 +15,8 @@
   let score = 0;
   let keys = {};
   let characterImage = null;
+  let spriteSheet = null; // {img, cols, rows, frameW, frameH}
+  let anim = { frame: 0, elapsed: 0, fps: 8 };
 
   async function tryLoadCharacter() {
     try {
@@ -22,11 +24,30 @@
       const imgPath = meta && meta.imagePath ? meta.imagePath : '/static/assets/characters/violet.png';
       const res = await fetch(imgPath, { method: 'GET' });
       if (res.ok) {
-        const blob = await res.blob();
-        const img = new Image();
-        img.src = URL.createObjectURL(blob);
-        await new Promise(r => { img.onload = r; img.onerror = r; });
-        characterImage = img;
+          const blob = await res.blob();
+          const img = new Image();
+          img.src = URL.createObjectURL(blob);
+          await new Promise(r => { img.onload = r; img.onerror = r; });
+          // set as simple image initially
+          characterImage = img;
+        }
+        // Try sprite metadata (sheet) next
+        const sheetMetaPath = '/static/assets/characters/violet/metadata.json';
+        try {
+          const sheetMeta = await fetch(sheetMetaPath).then(r => r.ok ? r.json() : null);
+          if (sheetMeta && sheetMeta.sheet) {
+            const sheetRes = await fetch(sheetMeta.sheet);
+            if (sheetRes.ok) {
+              const blob2 = await sheetRes.blob();
+              const simg = new Image();
+              simg.src = URL.createObjectURL(blob2);
+              await new Promise(r => { simg.onload = r; simg.onerror = r; });
+              spriteSheet = { img: simg, cols: sheetMeta.cols || sheetMeta.columns || 4, rows: sheetMeta.rows || 1, frameW: sheetMeta.frameWidth || sheetMeta.frameW || 48, frameH: sheetMeta.frameHeight || sheetMeta.frameH || 64 };
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
       }
     } catch (e) {
       // ignore
@@ -76,7 +97,22 @@
 
     // player
     const px = player.x, py = player.y;
-    if (characterImage) {
+    if (spriteSheet) {
+      // animate
+      const s = spriteSheet;
+      const total = s.cols * s.rows;
+      anim.elapsed += 1/60;
+      const frameDuration = 1 / anim.fps;
+      if (anim.elapsed >= frameDuration) {
+        anim.frame = (anim.frame + 1) % total;
+        anim.elapsed = 0;
+      }
+      const fx = anim.frame % s.cols;
+      const fy = Math.floor(anim.frame / s.cols);
+      const sw = s.frameW, sh = s.frameH;
+      const dw = player.w*1.6, dh = player.h*1.6;
+      ctx.drawImage(s.img, fx*sw, fy*sh, sw, sh, px - dw/2, py - (dh - player.h), dw, dh);
+    } else if (characterImage) {
       ctx.drawImage(characterImage, px-12, py-32, player.w*1.4, player.h*1.4);
     } else {
       ctx.fillStyle = '#fde68a'; ctx.fillRect(px, py, player.w, player.h);
