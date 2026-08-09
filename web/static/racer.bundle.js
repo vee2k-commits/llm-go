@@ -1,0 +1,96 @@
+const racer = (() => {
+  const width = 960;
+  const height = 540;
+  const trackWidth = 480;
+  const roadX = (width - trackWidth) / 2;
+  const container = document.getElementById('game-container');
+  container.innerHTML = `<div class="arcade-game-shell"><div class="game-panel"><div class="game-status"><span class="status-pill" id="speed">Speed: 0</span><span class="status-pill" id="distance">Distance: 0</span></div><button class="primary" id="restart">Restart</button></div><canvas id="racer-canvas" width="${width}" height="${height}"></canvas></div>`;
+  const canvas = document.getElementById('racer-canvas');
+  const ctx = canvas.getContext('2d');
+  const player = { x: width / 2, y: height - 120, width: 40, height: 70, speed: 0 };
+  const obstacles = [];
+  let distance = 0;
+  let lane = 0;
+
+  function spawnObstacle() {
+    const laneIndex = Math.floor(Math.random() * 3) - 1;
+    const x = width / 2 + laneIndex * 140;
+    obstacles.push({ x, y: -120, width: 48, height: 90, speed: 4 + distance * 0.01 });
+  }
+
+  function drawRoad() {
+    ctx.fillStyle = '#07111f';
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillRect(roadX, 0, trackWidth, height);
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([24, 16]);
+    ctx.beginPath();
+    ctx.moveTo(width/2, 0);
+    ctx.lineTo(width/2, height);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawPlayer() {
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(player.x - player.width/2, player.y, player.width, player.height);
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(player.x - 14, player.y + 12, 28, 42);
+  }
+
+  function drawObstacles() {
+    obstacles.forEach(o => {
+      ctx.fillStyle = '#f87171';
+      ctx.fillRect(o.x - o.width/2, o.y, o.width, o.height);
+    });
+  }
+
+  function updateObstacles() {
+    obstacles.forEach(o => o.y += o.speed);
+    while (obstacles.length && obstacles[0].y > height + 100) obstacles.shift();
+    if (Math.random() < 0.03) spawnObstacle();
+  }
+
+  function detectCollision() {
+    return obstacles.some(o => {
+      const px = player.x - player.width/2;
+      return px < o.x + o.width/2 && px + player.width > o.x - o.width/2 && player.y < o.y + o.height && player.y + player.height > o.y;
+    });
+  }
+
+  function updateStatus() {
+    document.getElementById('speed').textContent = `Speed: ${Math.round(player.speed)}`;
+    document.getElementById('distance').textContent = `Distance: ${Math.round(distance)}`;
+  }
+
+  function reset() {
+    player.speed = 12;
+    distance = 0;
+    obstacles.length = 0;
+    spawnObstacle();
+    updateStatus();
+  }
+
+  function update() {
+    player.speed = Math.min(24, player.speed + 0.003);
+    distance += player.speed * 0.02;
+    updateObstacles();
+    if (detectCollision()) reset();
+    drawRoad();
+    drawPlayer();
+    drawObstacles();
+    updateStatus();
+    requestAnimationFrame(update);
+  }
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft') player.x = Math.max(roadX + 30, player.x - 140);
+    if (event.key === 'ArrowRight') player.x = Math.min(roadX + trackWidth - 30, player.x + 140);
+  });
+
+  document.getElementById('restart').addEventListener('click', reset);
+  reset();
+  update();
+})();
