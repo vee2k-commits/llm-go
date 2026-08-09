@@ -8,6 +8,8 @@ const racer = (() => {
   const canvas = document.getElementById('racer-canvas');
   const ctx = canvas.getContext('2d');
   const player = { x: width / 2, y: height - 120, width: 40, height: 70, speed: 0 };
+  let avatarImage = null;
+  let useViolet = false;
   const obstacles = [];
   let distance = 0;
   let lane = 0;
@@ -34,10 +36,15 @@ const racer = (() => {
   }
 
   function drawPlayer() {
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(player.x - player.width/2, player.y, player.width, player.height);
-    ctx.fillStyle = '#111827';
-    ctx.fillRect(player.x - 14, player.y + 12, 28, 42);
+    if (avatarImage && useViolet) {
+      const w = player.width*1.6, h = player.height*1.6;
+      ctx.drawImage(avatarImage, player.x - w/2, player.y - (h - player.height), w, h);
+    } else {
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(player.x - player.width/2, player.y, player.width, player.height);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(player.x - 14, player.y + 12, 28, 42);
+    }
   }
 
   function drawObstacles() {
@@ -73,6 +80,29 @@ const racer = (() => {
     updateStatus();
   }
 
+  async function tryLoadViolet() {
+    try {
+      const meta = await fetch('/static/assets/characters/violet.json').then(r => r.ok ? r.json() : null);
+      const imgPath = meta && meta.imagePath ? meta.imagePath : '/static/assets/characters/violet.png';
+      const res = await fetch(imgPath);
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const img = new Image();
+      img.src = URL.createObjectURL(blob);
+      await new Promise(r => { img.onload = r; img.onerror = r; });
+      avatarImage = img;
+      // add simple UI to toggle Violet as avatar
+      const btn = document.createElement('button');
+      btn.className = 'primary';
+      btn.style.marginLeft = '12px';
+      btn.textContent = 'Use Violet';
+      btn.addEventListener('click', () => { useViolet = !useViolet; btn.textContent = useViolet ? 'Using Violet' : 'Use Violet'; });
+      document.querySelector('.game-panel').appendChild(btn);
+    } catch (e) {
+      // ignore
+    }
+  }
+
   function update() {
     player.speed = Math.min(24, player.speed + 0.003);
     distance += player.speed * 0.02;
@@ -92,5 +122,5 @@ const racer = (() => {
 
   document.getElementById('restart').addEventListener('click', reset);
   reset();
-  update();
+  tryLoadViolet().then(() => update());
 })();

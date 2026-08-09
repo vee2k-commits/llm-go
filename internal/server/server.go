@@ -2,8 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
@@ -42,6 +44,71 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/providers", s.handleProviders)
 	s.mux.HandleFunc("/games", s.handleGames)
 	s.mux.HandleFunc("/llm/stream", s.handleLLMStream)
+	s.mux.HandleFunc("/api/characters/upload", s.handleCharacterUpload)
+}
+
+func (s *Server) handleCharacterUpload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	// Expect a multipart form with fields: id, file
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "invalid form", http.StatusBadRequest)
+		return
+	}
+	id := r.FormValue("id")
+	if id == "" {
+		http.Error(w, "missing id", http.StatusBadRequest)
+		return
+	}
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "missing file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Simple validation: ensure content-type starts with image/
+	buf := make([]byte, 512)
+	n, _ := file.Read(buf)
+	contentType := http.DetectContentType(buf[:n])
+	if !strings.HasPrefix(contentType, "image/") {
+		http.Error(w, "invalid file type", http.StatusBadRequest)
+		return
+	}
+	// rewind
+	if _, err := file.Seek(0, 0); err != nil {
+		// ignore
+	}
+
+	// ensure dest dir
+	dstDir := "web/static/assets/characters/" + id
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		http.Error(w, "unable to create dir", http.StatusInternalServerError)
+		return
+	}
+	// write file as png or keep original extension
+	fname := header.Filename
+	outPath := dstDir + "/" + fname
+	out, err := os.Create(outPath)
+	if err != nil {
+		http.Error(w, "unable to save file", http.StatusInternalServerError)
+		return
+	}
+	defer out.Close()
+	if _, err := io.Copy(out, file); err != nil {
+		http.Error(w, "unable to write file", http.StatusInternalServerError)
+		return
+	}
+
+	// write a simple metadata file pointing at this file
+	meta := map[string]interface{}{"id": id, "imagePath": "/static/assets/characters/" + id + "/" + fname}
+	metaOut, _ := json.MarshalIndent(meta, "", "  ")
+	_ = os.WriteFile(dstDir+"/metadata.json", metaOut, 0644)
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{"status": "ok", "path": meta["imagePath"]})
 }
 
 func (s *Server) handleArcade(w http.ResponseWriter, r *http.Request) {

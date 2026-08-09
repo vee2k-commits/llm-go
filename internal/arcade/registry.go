@@ -20,6 +20,7 @@ func RegisterDefaultGames(reg *registry.Registry) {
 		{Kind: "game", ID: "racer", Data: map[string]interface{}{"name": "Racer", "description": "Race around the track and avoid traffic.", "demo": "racer", "url": "/arcade/racer", "tags": []string{"racing", "classic"}}},
 		{Kind: "game", ID: "mario", Data: map[string]interface{}{"name": "Mario", "description": "Run and jump through a side-scrolling platform world.", "demo": "mario", "url": "/arcade/mario", "tags": []string{"platformer", "classic"}}},
 		{Kind: "game", ID: "dressup", Data: map[string]interface{}{"name": "Dress Up Doll", "description": "Choose outfits and accessories for your doll.", "demo": "dressup", "url": "/arcade/dressup", "tags": []string{"creative", "casual"}}},
+		{Kind: "game", ID: "sidescroller", Data: map[string]interface{}{"name": "Side Scroller", "description": "A simple side-scrolling platform test featuring your imported character.", "demo": "sidescroller", "url": "/arcade/sidescroller", "tags": []string{"platformer", "new"}}},
 	}
 	for _, game := range games {
 		_ = reg.Register(game)
