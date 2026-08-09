@@ -154,7 +154,9 @@ func (m *Manager) RegisterMediaSources(sources []MediaSource) {
 	}
 }
 
-// handlePlay resolves the requested uri and hands it to the player.
+// handlePlay resolves the requested uri and hands it to the player. The bus
+// dispatches synchronously, so the (potentially slow, yt-dlp bound) resolver
+// work runs in a goroutine and publishers never block.
 func (m *Manager) handlePlay(msg bus.Msg) {
 	p := asMap(msg.Payload)
 	uri, _ := p["uri"].(string)
@@ -164,25 +166,27 @@ func (m *Manager) handlePlay(msg bus.Msg) {
 		m.notify.Warn("Audio", "audio.play needs a uri")
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	tr, err := m.resolver.Resolve(ctx, uri)
-	if err != nil {
-		m.notify.Errorf("Audio", "could not resolve %q: %v", uri, err)
-		return
-	}
-	if tr.Title == "" {
-		tr.Title = title
-	}
-	tr.Meta = map[string]any{"requested": uri}
-	if err := m.player.Play(ctx, tr.URI, tr.Title); err != nil {
-		m.notify.Errorf("Audio", "play failed: %v", err)
-		return
-	}
-	m.setCurrent(tr)
-	m.addRecent(tr)
-	m.bus.Publish("audio.started", tr)
-	m.publishState()
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		tr, err := m.resolver.Resolve(ctx, uri)
+		if err != nil {
+			m.notify.Errorf("Audio", "could not resolve %q: %v", uri, err)
+			return
+		}
+		if tr.Title == "" {
+			tr.Title = title
+		}
+		tr.Meta = map[string]any{"requested": uri}
+		if err := m.player.Play(ctx, tr.URI, tr.Title); err != nil {
+			m.notify.Errorf("Audio", "play failed: %v", err)
+			return
+		}
+		m.setCurrent(tr)
+		m.addRecent(tr)
+		m.bus.Publish("audio.started", tr)
+		m.publishState()
+	}()
 }
 
 func (m *Manager) handlePause(_ bus.Msg) {
@@ -238,7 +242,8 @@ func (m *Manager) handleVolume(msg bus.Msg) {
 }
 
 // handleQueueSearch resolves a query into tracks and appends them to the
-// internal play queue.
+// internal play queue. Resolution shells out to yt-dlp and can take tens of
+// seconds, so it runs in a goroutine to keep bus publishers unblocked.
 func (m *Manager) handleQueueSearch(msg bus.Msg) {
 	p := asMap(msg.Payload)
 	query, _ := p["query"].(string)
@@ -251,24 +256,26 @@ func (m *Manager) handleQueueSearch(msg bus.Msg) {
 		m.notify.Warn("Audio", "audio.queueSearch needs a query")
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-	tracks, err := m.resolver.Search(ctx, query, n)
-	if err != nil {
-		m.notify.Errorf("Audio", "search failed: %v", err)
-		return
-	}
-	if len(tracks) == 0 {
-		m.notify.Warn("Audio", "no results for "+query)
-		return
-	}
-	m.mu.Lock()
-	m.queue = append(m.queue, tracks...)
-	q := append([]Track{}, m.queue...)
-	m.mu.Unlock()
-	m.bus.Publish("audio.queue", q)
-	m.publishState()
-	m.notify.Info("Audio", fmt.Sprintf("queued %d track(s) for %q", len(tracks), query))
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		tracks, err := m.resolver.Search(ctx, query, n)
+		if err != nil {
+			m.notify.Errorf("Audio", "search failed: %v", err)
+			return
+		}
+		if len(tracks) == 0 {
+			m.notify.Warn("Audio", "no results for "+query)
+			return
+		}
+		m.mu.Lock()
+		m.queue = append(m.queue, tracks...)
+		q := append([]Track{}, m.queue...)
+		m.mu.Unlock()
+		m.bus.Publish("audio.queue", q)
+		m.publishState()
+		m.notify.Info("Audio", fmt.Sprintf("queued %d track(s) for %q", len(tracks), query))
+	}()
 }
 
 // handleEnd advances the queue when a player reports a track finished.

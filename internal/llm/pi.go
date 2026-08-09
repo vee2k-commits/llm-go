@@ -54,6 +54,16 @@ func (p *PiBackend) UpdateOpts(fn func(*PiOpts)) {
 	fn(&p.opts)
 }
 
+// SetBaseURL points the proxy at a new pi-harness address (driven by the
+// llm.pi.url setting) and drops cached sessions, which belong to the old
+// server.
+func (p *PiBackend) SetBaseURL(u string) {
+	p.mu.Lock()
+	p.opts.BaseURL = strings.TrimSuffix(strings.TrimSpace(u), "/")
+	p.sess = map[string]string{}
+	p.mu.Unlock()
+}
+
 // Name implements Backend.
 func (p *PiBackend) Name() string { return "pi" }
 

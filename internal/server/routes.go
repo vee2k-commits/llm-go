@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -8,8 +9,8 @@ import (
 
 	"vee/internal/bus"
 	"vee/internal/config"
-	"vee/internal/lexicon"
 	"vee/internal/layers"
+	"vee/internal/lexicon"
 	"vee/internal/llm"
 	"vee/internal/registry"
 	"vee/internal/theme"
@@ -143,7 +144,7 @@ func apiGames(b *bus.Bus) http.HandlerFunc {
 	}
 }
 
-func apiChat(m *llm.Manager) http.HandlerFunc {
+func apiChat(b *bus.Bus, m *llm.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -162,8 +163,11 @@ func apiChat(m *llm.Manager) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"sessionId": req.SessionID})
+		// Announce the submission on the bus (macro triggers listen here),
+		// then drive the chat turn.
+		b.Publish("chat.submitted", map[string]any{"text": req.Content, "origin": "chat"})
 		go func() {
-			_ = m.Prompt(r.Context(), req.SessionID, req.Content, llm.Opts{})
+			_ = m.Prompt(context.Background(), req.SessionID, req.Content, llm.Opts{})
 		}()
 	}
 }
@@ -206,7 +210,7 @@ func apiSpeech(b *bus.Bus) http.HandlerFunc {
 		switch action {
 		case "speak":
 			var req struct {
-				Text string `json:"text"`
+				Text  string `json:"text"`
 				Voice string `json:"voice"`
 			}
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

@@ -21,9 +21,7 @@
     </div>
     <div id="chat-messages" class="chat-messages"></div>
     <div id="chat-input-area">
-      <input id="chat-input" type="text" data-lx="chat.placeholder" placeholder="Type a message..."
-             hx-post="/api/chat" hx-target="#chat-messages" hx-swap="innerHTML" hx-trigger="keydown"
-             hx-indicator="#chat-spinner"/>
+      <input id="chat-input" type="text" data-lx="chat.placeholder" placeholder="Type a message..."/>
       <button id="chat-send" data-lx="chat.send">Send</button>
       <button id="attach-btn" data-lx="chat.attach">📎</button>
       <button id="mic-btn" data-lx="chat.mic">🎤</button>
@@ -32,6 +30,8 @@
   </div>
 
   <div id="notify-stack" data-layer="notify" class="layer toast"></div>
+
+  <button id="settings-gear" class="gear-btn" title="Settings" aria-label="Settings">&#9881;</button>
 
   <div id="settings-panel" data-layer="settings" class="layer panel-right hidden">
     <h2 data-lx="settings.title">Settings</h2>

@@ -54,8 +54,26 @@ func NewEngine(b *bus.Bus, reg *registry.Registry, n *notify.Service) *Engine {
 				e.Notify.Errorf("Macro", "%v", err)
 			}
 		})
+		// Chat text triggers: any submitted chat message is matched against
+		// macro triggers and runs the first hit (same path as macro.run).
+		b.Subscribe("chat.submitted", func(msg bus.Msg) {
+			p, _ := msg.Payload.(map[string]any)
+			text, _ := p["text"].(string)
+			e.TriggerByText(text)
+		})
 	}
 	return e
+}
+
+// TriggerByText runs the first macro whose trigger matches text (if any).
+func (e *Engine) TriggerByText(text string) {
+	id := e.Match(text)
+	if id == "" {
+		return
+	}
+	if err := e.Run(id); err != nil && e.Notify != nil {
+		e.Notify.Errorf("Macro", "%v", err)
+	}
 }
 
 // Register validates and stores a macro, then exposes it as a registry command.
@@ -112,7 +130,7 @@ func (e *Engine) SeedDefaultMacros() {
 		{
 			ID:          "funny-animals",
 			Name:        "Funny Animals",
-			Trigger:     "funny animals",
+			Trigger:     "animals",
 			Description: "Queue funny animal videos and chat about them.",
 			Steps: []Step{
 				{Action: "audio.queueSearch", Args: map[string]any{"query": "funny animals compilation", "n": 5}},

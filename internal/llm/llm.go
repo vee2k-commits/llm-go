@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -81,6 +82,7 @@ type Manager struct {
 	mu        sync.Mutex
 	sessions  map[string]*Session
 	seqBySess map[string]int
+	chatState map[string]map[string]any // per-session last assistant message
 }
 
 // NewManager wires the manager. active is the default backend name. It
@@ -146,6 +148,30 @@ func (m *Manager) Active() string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.active
+}
+
+// Pi returns the registered pi backend, if any (used by the health watcher).
+func (m *Manager) Pi() *PiBackend {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if b, ok := m.backends["pi"]; ok {
+		if pi, ok := b.(*PiBackend); ok {
+			return pi
+		}
+	}
+	return nil
+}
+
+// OpenAI returns the registered OpenAI-compatible backend, if any.
+func (m *Manager) OpenAI() *OpenAIBackend {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if b, ok := m.backends["openai"]; ok {
+		if oa, ok := b.(*OpenAIBackend); ok {
+			return oa
+		}
+	}
+	return nil
 }
 
 // Tools exposes the tool registry for tool/skill registration.
@@ -220,6 +246,17 @@ func (m *Manager) Prompt(ctx context.Context, sessionID, content string, opts Op
 		"seq": seq,
 	})
 
+	// Publish an empty assistant message immediately so the frontend has a
+	// container to append token deltas to.
+	m.append(s, RoleAssistant, "")
+	m.mu.Lock()
+	assistantSeq := m.seqBySess[s.ID] - 1
+	m.mu.Unlock()
+	m.bus.Publish("chat.message", map[string]any{
+		"sessionId": s.ID, "role": RoleAssistant, "content": "",
+		"seq": assistantSeq,
+	})
+
 	backend, ok := m.backends[m.active]
 	if !ok {
 		return fmt.Errorf("active backend %q not registered", m.active)
@@ -228,9 +265,12 @@ func (m *Manager) Prompt(ctx context.Context, sessionID, content string, opts Op
 		opts.ToolDispatch = m.tools.Dispatch(m.bus)
 	}
 
+	var streamed strings.Builder
+
 	on := func(ev Event) {
 		switch ev.Type {
 		case "token":
+			streamed.WriteString(ev.Text)
 			m.bus.Publish("chat.token", map[string]any{"sessionId": s.ID, "delta": ev.Text})
 		case "thinking":
 			m.bus.Publish("chat.thinking", map[string]any{"sessionId": s.ID, "delta": ev.Thinking})
@@ -250,6 +290,31 @@ func (m *Manager) Prompt(ctx context.Context, sessionID, content string, opts Op
 	}
 
 	err := backend.Stream(ctx, s.ID, m.History(s), opts, on)
+	if err != nil && m.notify != nil {
+		m.notify.Errorf("LLM error", "%v", err)
+	}
+
+	// Mirror the final assistant message on state.chat.<session> (and the
+	// combined state.chat snapshot) so SSE replay restores the conversation.
+	final := streamed.String()
+	m.mu.Lock()
+	if len(s.msgs) > 0 && s.msgs[len(s.msgs)-1].Role == RoleAssistant {
+		s.msgs[len(s.msgs)-1].Content = final
+	}
+	if m.chatState == nil {
+		m.chatState = map[string]map[string]any{}
+	}
+	m.chatState[s.ID] = map[string]any{
+		"sessionId": s.ID, "role": RoleAssistant, "content": final, "seq": assistantSeq,
+	}
+	combined := make(map[string]map[string]any, len(m.chatState))
+	for k, v := range m.chatState {
+		combined[k] = v
+	}
+	m.mu.Unlock()
+	m.bus.SetState("state.chat."+s.ID, m.chatState[s.ID])
+	m.bus.SetState("state.chat", combined)
+
 	if err != nil {
 		return err
 	}

@@ -41,6 +41,14 @@ func NewLlamaCppBackend(opts LlamaCppOpts) *LlamaCppBackend {
 // Name implements Backend.
 func (l *LlamaCppBackend) Name() string { return "llamacpp" }
 
+// SetBaseURL points the backend at a new llama-server address (driven by the
+// llm.llamacpp.url setting).
+func (l *LlamaCppBackend) SetBaseURL(u string) {
+	l.mu.Lock()
+	l.opts.BaseURL = strings.TrimSpace(u)
+	l.mu.Unlock()
+}
+
 // Health pings llama-server.
 func (l *LlamaCppBackend) Health(ctx context.Context) bool {
 	l.mu.RLock()

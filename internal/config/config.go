@@ -132,6 +132,20 @@ func (s *Store) Get(key string) string {
 	return ""
 }
 
+// Persisted returns the raw persisted (sqlite) override for a key, bypassing
+// the in-memory schema. Useful for knobs whose spec is registered after New
+// (overrides are normally only loaded for specs known at construction).
+func (s *Store) Persisted(key string) string {
+	if s.db == nil {
+		return ""
+	}
+	all, err := s.db.SettingsAll(context.Background())
+	if err != nil {
+		return ""
+	}
+	return all[key]
+}
+
 // GetDefault returns the schema default.
 func (s *Store) GetDefault(key string) string {
 	s.mu.RLock()

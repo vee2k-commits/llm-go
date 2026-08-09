@@ -49,6 +49,9 @@ func ParseText(data []byte) ([]Macro, error) {
 		if strings.HasPrefix(line, "- action:") {
 			step := Step{Action: strings.TrimSpace(strings.TrimPrefix(line, "- action:"))}
 			curStep = &step
+			if cur == nil {
+				cur = &Macro{}
+			}
 			cur.Steps = append(cur.Steps, step)
 			continue
 		}
@@ -58,7 +61,7 @@ func ParseText(data []byte) ([]Macro, error) {
 			if err != nil {
 				return nil, err
 			}
-			if curStep != nil && len(cur.Steps) > 0 {
+			if curStep != nil && cur != nil && len(cur.Steps) > 0 {
 				cur.Steps[len(cur.Steps)-1].Args = args
 			}
 			continue
@@ -70,12 +73,24 @@ func ParseText(data []byte) ([]Macro, error) {
 		val = strings.TrimSpace(val)
 		switch strings.TrimSpace(key) {
 		case "id":
+			if cur == nil {
+				cur = &Macro{}
+			}
 			cur.ID = val
 		case "name":
+			if cur == nil {
+				cur = &Macro{}
+			}
 			cur.Name = val
 		case "trigger":
+			if cur == nil {
+				cur = &Macro{}
+			}
 			cur.Trigger = val
 		case "description":
+			if cur == nil {
+				cur = &Macro{}
+			}
 			cur.Description = val
 		}
 	}

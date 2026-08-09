@@ -177,3 +177,50 @@ steps:
 		t.Fatalf("LoadFile text failed: %v", err)
 	}
 }
+
+// Regression: ParseText must not panic when a scalar key (id:, name:, ...)
+// or a step appears before any "steps:" header.
+func TestParseTextNoPanicWithoutStepsHeader(t *testing.T) {
+	cases := [][]byte{
+		[]byte("id: m1\nname: M1\ntrigger: hi\nsteps:\n- action: a\n"),
+		[]byte("- action: a\n- args: {k: 1}\n"),
+		[]byte("id: only-id\n"),
+		[]byte("steps:\n- action: a\nid: late\n"),
+	}
+	for i, data := range cases {
+		ms, err := ParseText(data)
+		if err != nil {
+			t.Fatalf("case %d: unexpected error: %v", i, err)
+		}
+		if len(ms) == 0 {
+			t.Fatalf("case %d: expected at least one macro", i)
+		}
+	}
+}
+
+func TestChatSubmittedTriggersMacro(t *testing.T) {
+	b := bus.New(10)
+	reg, _ := registry.New(context.Background(), b, nil)
+	e := NewEngine(b, reg, nil)
+
+	var fired bool
+	b.Subscribe("test.fired", func(msg bus.Msg) {
+		fired = true
+	})
+	_ = e.Register(Macro{
+		ID:      "animals-macro",
+		Trigger: "animals",
+		Steps:   []Step{{Action: "test.fired"}},
+	})
+
+	b.Publish("chat.submitted", map[string]any{"text": "please load funny animals videos", "origin": "chat"})
+	if !fired {
+		t.Fatal("chat.submitted did not trigger matching macro")
+	}
+
+	fired = false
+	b.Publish("chat.submitted", map[string]any{"text": "nothing matching here", "origin": "chat"})
+	if fired {
+		t.Fatal("macro fired on non-matching text")
+	}
+}

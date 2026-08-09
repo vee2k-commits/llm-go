@@ -62,6 +62,27 @@ body {
 
 #desktop:hover .glow-cursor { display: block; }
 
+.glow-cursor.pulse {
+  display: block;
+  animation: cursor-pulse 0.7s ease-out;
+}
+
+@keyframes cursor-pulse {
+  0%   { box-shadow: 0 0 0 0 var(--color-glow), 0 0 18px var(--color-glow); opacity: 1; }
+  70%  { box-shadow: 0 0 0 26px rgba(0,229,255,0), 0 0 30px var(--color-glow); opacity: 0.9; }
+  100% { box-shadow: 0 0 0 0 rgba(0,229,255,0), 0 0 12px var(--color-glow); opacity: 0.7; }
+}
+
+.bubble-input {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-muted);
+  border-radius: var(--btn-radius);
+  padding: 6px 10px;
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
 .chat-bubble {
   position: absolute;
   background: var(--color-panel);
@@ -162,6 +183,71 @@ body {
   overflow-y: auto;
 }
 
+.gear-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 60;
+  background: var(--color-panel);
+  color: var(--color-primary);
+  border: 1px solid var(--color-muted);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.gear-btn:hover {
+  box-shadow: 0 0 12px var(--color-glow);
+  transform: rotate(30deg);
+}
+
+.settings-group { margin-bottom: 18px; }
+
+.settings-group-title {
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-muted);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.setting-label {
+  font-size: 0.9em;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.setting-input {
+  background: var(--color-panel);
+  border: 1px solid var(--color-muted);
+  border-radius: var(--btn-radius);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  padding: 4px 8px;
+  max-width: 140px;
+}
+
+input[type="checkbox"].setting-input {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+  padding: 0;
+}
+
 #arcade-overlay {
   background: var(--arcade-bg);
   display: flex;
@@ -172,6 +258,124 @@ body {
 }
 
 #arcade-overlay[data-game] { background: var(--arcade-bg); }
+
+#arcade-content { width: 100%; height: 100%; }
+
+.game-shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 8px;
+  align-content: start;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.game-shelf.shelf-highlight {
+  outline: 2px solid var(--arcade-neon);
+  box-shadow: 0 0 24px var(--arcade-neon);
+  border-radius: var(--radius-lg);
+}
+
+.game-tile {
+  background: var(--color-panel);
+  border: 1px solid var(--arcade-neon);
+  border-radius: var(--radius);
+  padding: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.game-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 16px var(--arcade-neon);
+}
+
+.game-title {
+  color: var(--arcade-neon);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.game-meta {
+  color: var(--color-muted);
+  font-size: 0.8em;
+  margin-top: 4px;
+}
+
+.arcade-empty {
+  grid-column: 1 / -1;
+  color: var(--color-muted);
+  text-align: center;
+  padding: 40px 0;
+}
+
+.arcade-choice {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: rgba(10,1,20,0.75);
+  z-index: 5;
+}
+
+.choice-btn {
+  background: var(--color-panel);
+  color: var(--arcade-neon);
+  border: 1px solid var(--arcade-neon);
+  border-radius: var(--radius);
+  padding: 14px 28px;
+  font-family: var(--font-family);
+  font-size: 1.05em;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.choice-btn:hover { box-shadow: 0 0 18px var(--arcade-neon); }
+
+.game-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.game-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--arcade-neon);
+}
+
+.game-bar-title {
+  color: var(--arcade-neon);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.game-close {
+  background: none;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  border-radius: var(--btn-radius);
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.game-close:hover { box-shadow: 0 0 10px var(--color-accent); }
+
+.game-iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #000;
+}
 
 #wizard-overlay {
   background: rgba(7,7,13,0.9);

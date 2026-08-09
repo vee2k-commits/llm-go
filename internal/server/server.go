@@ -9,8 +9,8 @@ import (
 	"vee/internal/bus"
 	"vee/internal/config"
 	"vee/internal/db"
-	"vee/internal/lexicon"
 	"vee/internal/layers"
+	"vee/internal/lexicon"
 	"vee/internal/llm"
 	"vee/internal/notify"
 	"vee/internal/registry"
@@ -30,11 +30,12 @@ func New(addr string, b *bus.Bus, database *db.DB, reg *registry.Registry, cfg *
 	mux.HandleFunc("/api/layers", apiLayers(lay))
 	mux.HandleFunc("/api/games", apiGames(b))
 	mux.HandleFunc("/api/arcade/", apiArcade(b))
-	mux.HandleFunc("/api/chat", apiChat(m))
+	mux.HandleFunc("/api/chat", apiChat(b, m))
 	mux.HandleFunc("/api/audio/", apiAudio(b))
 	mux.HandleFunc("/api/speech/", apiSpeech(b))
 	mux.HandleFunc("/api/macros/", apiMacros(b))
 	mux.HandleFunc("/api/wizards/", apiWizards(b))
+	mux.Handle("/arcade/games/", http.StripPrefix("/arcade/games/", http.FileServer(http.Dir("web/arcade/games"))))
 	mux.HandleFunc("/partials/", apiPartials)
 	mux.HandleFunc("/static/", serveStatic)
 	mux.HandleFunc("/", serveIndex)
