@@ -78,6 +78,7 @@ SFXKit.prototype.voice = function (o) {
       src.frequency.exponentialRampToValueAtTime(Math.max(1, o.to), t0 + dur);
     }
   }
+  var head = src;                       /* keep source ref for start/stop */
   if (o.filter) {
     var f = c.createBiquadFilter();
     f.type = o.filter.type;
@@ -101,8 +102,8 @@ SFXKit.prototype.voice = function (o) {
   src.connect(g); g.connect(lp);
   lp.connect(o.bus === "music" ? this.musicBus : this.sfxBus);
 
-  if (o.noise) { src.start(t0); src.stop(t0 + dur); }
-  else { src.start(t0); src.stop(t0 + dur + 0.02); }
+  if (o.noise) { head.start(t0); head.stop(t0 + dur); }
+  else { head.start(t0); head.stop(t0 + dur + 0.02); }
   if (o.bus !== "music") this._duck();
 };
 
