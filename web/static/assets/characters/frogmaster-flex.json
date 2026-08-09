@@ -1,0 +1,9 @@
+{
+  "id": "frogmaster-flex",
+  "name": "Frogmaster Flex",
+  "description": "The Adventurous Frog — curious, cheerful pixel frog hero with a purple scarf and gold medallion (from user art)",
+  "author": "user",
+  "license": "user-supplied",
+  "imagePath": "/static/assets/characters/frogmaster-flex/solo.png",
+  "palette": ["#8bbd24", "#22683a", "#f1d39b", "#7e409c", "#ecae30"]
+}

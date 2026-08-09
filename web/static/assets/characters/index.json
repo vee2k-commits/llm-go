@@ -1,0 +1,25 @@
+{
+  "characters": [
+    {
+      "id": "violet",
+      "name": "Violet",
+      "sheet": "/static/assets/characters/violet/sheet.png",
+      "solo": "/static/assets/characters/violet/solo.png",
+      "meta": "/static/assets/characters/violet/metadata.json"
+    },
+    {
+      "id": "frogmaster-flex",
+      "name": "Frogmaster Flex",
+      "sheet": "/static/assets/characters/frogmaster-flex/sheet.png",
+      "solo": "/static/assets/characters/frogmaster-flex/solo.png",
+      "meta": "/static/assets/characters/frogmaster-flex/metadata.json"
+    },
+    {
+      "id": "princess-kellee",
+      "name": "Princess Kellee",
+      "sheet": "/static/assets/characters/princess-kellee/sheet.png",
+      "solo": "/static/assets/characters/princess-kellee/solo.png",
+      "meta": "/static/assets/characters/princess-kellee/metadata.json"
+    }
+  ]
+}

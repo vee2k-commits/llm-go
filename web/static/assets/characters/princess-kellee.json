@@ -1,0 +1,9 @@
+{
+  "id": "princess-kellee",
+  "name": "Princess Kellee",
+  "description": "Princess of Play — royal pixel princess who loves adventure, racing, puzzles and fashion (from user art)",
+  "author": "user",
+  "license": "user-supplied",
+  "imagePath": "/static/assets/characters/princess-kellee/solo.png",
+  "palette": ["#7c2d96", "#ae4ac8", "#e14b92", "#e79f1d", "#1b1c1d"]
+}
