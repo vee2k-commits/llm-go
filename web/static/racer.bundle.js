@@ -91,6 +91,21 @@ const racer = (() => {
       img.src = URL.createObjectURL(blob);
       await new Promise(r => { img.onload = r; img.onerror = r; });
       avatarImage = img;
+      // try server selection to override
+      try {
+        const sel = await fetch('/api/characters/selected').then(r => r.ok ? r.json() : {});
+        if (sel && sel.id) {
+          const meta2 = await fetch(`/static/assets/characters/${sel.id}/metadata.json`).then(r => r.ok ? r.json() : null).catch(()=>null);
+          const path = meta2 && (meta2.sheet || meta2.imagePath) ? (meta2.sheet || meta2.imagePath) : `/static/assets/characters/${sel.id}/solo.png`;
+          const r2 = await fetch(path).catch(()=>null);
+          if (r2 && r2.ok) {
+            const b2 = await r2.blob();
+            const img2 = new Image(); img2.src = URL.createObjectURL(b2);
+            await new Promise(r=>{img2.onload=r; img2.onerror=r});
+            avatarImage = img2; useViolet = true;
+          }
+        }
+      } catch(e) {}
       // add simple UI to toggle Violet as avatar
       const btn = document.createElement('button');
       btn.className = 'primary';
@@ -107,7 +122,7 @@ const racer = (() => {
     player.speed = Math.min(24, player.speed + 0.003);
     distance += player.speed * 0.02;
     updateObstacles();
-    if (detectCollision()) reset();
+    if (detectCollision()) { try { if (window.SFX) window.SFX.playCollision(); } catch(e){}; reset(); }
     drawRoad();
     drawPlayer();
     drawObstacles();

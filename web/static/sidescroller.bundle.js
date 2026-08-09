@@ -16,10 +16,26 @@
   let keys = {};
   let characterImage = null;
   let spriteSheet = null; // {img, cols, rows, frameW, frameH}
-  let anim = { frame: 0, elapsed: 0, fps: 8 };
+  let anim = { frame: 0, elapsed: 0, fps: 10 };
 
   async function tryLoadCharacter() {
     try {
+      // check server selection
+      try {
+        const sel = await fetch('/api/characters/selected').then(r => r.ok ? r.json() : {});
+        if (sel && sel.id) {
+          const meta = await fetch(`/static/assets/characters/${sel.id}/metadata.json`).then(r => r.ok ? r.json() : null);
+          const imgPath = meta && meta.sheet ? meta.sheet : (meta && meta.imagePath ? meta.imagePath : `/static/assets/characters/${sel.id}/sheet.png`);
+          const resSel = await fetch(imgPath).catch(()=>null);
+          if (resSel && resSel.ok) {
+            const blob = await resSel.blob();
+            const img = new Image(); img.src = URL.createObjectURL(blob);
+            await new Promise(r=>{img.onload=r; img.onerror=r});
+            spriteSheet = { img, cols: meta.cols||4, rows: meta.rows||1, frameW: meta.frameWidth||64, frameH: meta.frameHeight||64 };
+            return;
+          }
+        }
+      } catch(e){}
       const meta = await fetch('/static/assets/characters/violet.json').then(r => r.ok ? r.json() : null);
       const imgPath = meta && meta.imagePath ? meta.imagePath : '/static/assets/characters/violet.png';
       const res = await fetch(imgPath, { method: 'GET' });
@@ -129,7 +145,14 @@
   document.addEventListener('keydown', e => {
     keys[e.key] = true;
     if (e.key === ' ' || e.key === 'ArrowUp') {
-      if (player.onGround) { player.vy = -12; player.onGround = false; }
+      if (player.onGround) {
+        player.vy = -12; player.onGround = false;
+        try { if (window.SFX) window.SFX.playJump(); } catch(e){}
+        if (spriteSheet) {
+          // set a jump frame (assume frame 2 is jump if available)
+          anim.frame = Math.min(anim.frame, (spriteSheet.cols * spriteSheet.rows) - 1);
+        }
+      }
     }
   });
   document.addEventListener('keyup', e => { keys[e.key] = false; });

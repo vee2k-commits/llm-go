@@ -12,6 +12,14 @@ function createLoadingState() {
   }
 }
 function loadGameScript(name) {
+  // ensure SFX helper is loaded first
+  if (!window.SFX && !document.getElementById('sfx-script')) {
+    const s = document.createElement('script');
+    s.id = 'sfx-script';
+    s.src = '/static/sfx.js';
+    s.defer = true;
+    document.body.appendChild(s);
+  }
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = `/static/${name}.js`;

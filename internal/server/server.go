@@ -45,6 +45,49 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/games", s.handleGames)
 	s.mux.HandleFunc("/llm/stream", s.handleLLMStream)
 	s.mux.HandleFunc("/api/characters/upload", s.handleCharacterUpload)
+	s.mux.HandleFunc("/api/characters/selected", s.handleCharacterSelected)
+}
+
+func (s *Server) handleCharacterSelected(w http.ResponseWriter, r *http.Request) {
+	// GET returns current selection, POST sets selection { id: "violet" }
+	selPath := "web/static/assets/characters/selected.json"
+	switch r.Method {
+	case http.MethodGet:
+		if b, err := os.ReadFile(selPath); err == nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(b)
+			return
+		}
+		// not found -> empty
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("{}"))
+		return
+	case http.MethodPost:
+		var payload struct {
+			ID string `json:"id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, "invalid json", http.StatusBadRequest)
+			return
+		}
+		if payload.ID == "" {
+			http.Error(w, "missing id", http.StatusBadRequest)
+			return
+		}
+		meta := map[string]string{"id": payload.ID}
+		out, _ := json.MarshalIndent(meta, "", "  ")
+		_ = os.MkdirAll("web/static/assets/characters", 0755)
+		if err := os.WriteFile(selPath, out, 0644); err != nil {
+			http.Error(w, "unable to save", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
+		return
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 }
 
 func (s *Server) handleCharacterUpload(w http.ResponseWriter, r *http.Request) {
