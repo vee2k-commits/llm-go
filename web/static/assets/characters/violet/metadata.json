@@ -1,0 +1,8 @@
+{
+  "id": "violet",
+  "sheet": "/static/assets/characters/violet/sheet.png",
+  "cols": 4,
+  "rows": 1,
+  "frameWidth": 64,
+  "frameHeight": 64
+}

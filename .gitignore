@@ -1,0 +1,9 @@
+# Local runtime artifacts
+vee.db
+output.txt
+startup.log
+vee-bin
+
+# Temp clone directories
+.tmp-llm-go-clone/
+.tmp-*/

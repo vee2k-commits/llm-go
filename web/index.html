@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vee</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/htmx.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <div id="desktop" data-layer="desktop" class="layer overlay">
+    <div id="cursor" class="glow-cursor"></div>
+    <div id="chat-bubble" class="chat-bubble hidden"></div>
+  </div>
+
+  <div id="chat-panel" data-layer="chat" class="layer panel-left">
+    <div id="chat-header">
+      <button id="vee-wordmark" data-lx="vee.wordmark" class="wordmark">Vee</button>
+      <span id="wordmark-dot" class="hidden">[Vee]</span>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <div id="chat-input-area">
+      <input id="chat-input" type="text" data-lx="chat.placeholder" placeholder="Type a message..."
+             hx-post="/api/chat" hx-target="#chat-messages" hx-swap="innerHTML" hx-trigger="keydown"
+             hx-indicator="#chat-spinner"/>
+      <button id="chat-send" data-lx="chat.send">Send</button>
+      <button id="attach-btn" data-lx="chat.attach">📎</button>
+      <button id="mic-btn" data-lx="chat.mic">🎤</button>
+      <button id="vee-btn" data-lx="chat.vee-btn" data-command="macro.vee">Vee</button>
+    </div>
+  </div>
+
+  <div id="notify-stack" data-layer="notify" class="layer toast"></div>
+
+  <div id="settings-panel" data-layer="settings" class="layer panel-right hidden">
+    <h2 data-lx="settings.title">Settings</h2>
+    <div id="settings-body"></div>
+  </div>
+
+  <div id="arcade-overlay" data-layer="arcade" class="layer overlay hidden">
+    <div id="arcade-content"></div>
+  </div>
+
+  <div id="wizard-overlay" data-layer="wizard" class="layer overlay hidden">
+    <div id="wizard-content"></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

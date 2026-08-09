@@ -1,0 +1,7 @@
+<div id="arcade-terminal" class="overlay hidden">
+  <div class="terminal">
+    <p data-lx="arcade.nerd.greeting">THE ARCADE IS OPEN. SPEAK THE NAME OF A GAME.</p>
+    <input type="text" id="nerd-input" hx-post="/api/arcade/voice" hx-target="#nerd-output" hx-swap="innerHTML"/>
+    <div id="nerd-output"></div>
+  </div>
+</div>

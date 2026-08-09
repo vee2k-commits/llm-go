@@ -1,0 +1,7 @@
+<div id="arcade-overlay" data-layer="arcade" class="layer overlay hidden">
+  <h2 data-lx="arcade.title">Arcade</h2>
+  <div id="games-grid">
+    <div hx-get="/api/games" hx-target="#games-grid" hx-trigger="load"></div>
+  </div>
+  <button id="arcade-close" data-lx="arcade.close">Close</button>
+</div>

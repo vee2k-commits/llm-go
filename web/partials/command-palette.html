@@ -1,0 +1,5 @@
+<div id="command-palette" class="overlay hidden">
+  <input type="text" id="palette-input" placeholder="Type a command..."
+         hx-post="/api/chat" hx-target="#chat-messages" hx-swap="innerHTML"/>
+  <div id="palette-results"></div>
+</div>

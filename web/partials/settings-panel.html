@@ -1,0 +1,9 @@
+<div id="settings-panel" data-layer="settings" class="layer panel-right hidden">
+  <h2>Settings</h2>
+  <div id="settings-body">
+    <form hx-post="/api/settings" hx-target="#settings-body" hx-swap="innerHTML">
+      <div id="settings-fields"></div>
+      <button type="submit">Save</button>
+    </form>
+  </div>
+</div>

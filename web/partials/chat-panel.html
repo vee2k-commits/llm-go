@@ -1,0 +1,13 @@
+<div id="chat-panel" data-layer="chat" class="layer panel-left">
+  <div id="chat-header">
+    <button id="vee-wordmark" class="wordmark">Vee</button>
+  </div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <div id="chat-input-area">
+    <input id="chat-input" type="text" placeholder="Ask Vee..."
+           hx-post="/api/chat" hx-target="#chat-messages" hx-swap="innerHTML"/>
+    <button id="attach-btn">📎</button>
+    <button id="mic-btn">🎤</button>
+    <button id="vee-btn" data-command="macro.vee">Vee</button>
+  </div>
+</div>

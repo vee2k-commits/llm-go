@@ -1,0 +1,9 @@
+{
+  "id": "violet",
+  "name": "Violet",
+  "description": "Mystical Adventurer — paper-RPG inspired character (from user art)",
+  "author": "user",
+  "license": "user-supplied",
+  "imagePath": "/static/assets/characters/violet.png",
+  "palette": ["#f8c8d8", "#f8a9c1", "#a78bfa", "#7dd3fc"]
+}
