@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Paper-craft "Vee" mark: cream paper card, plum ink outline, warm-gold V.
+       Hand-cut tilt (-1.5 deg), hard-offset shadow, no gradients. -->
+  <g transform="rotate(-1.5 32 32)">
+    <!-- hard-offset shadow (plum, like a paper layer underneath) -->
+    <rect x="9" y="11" width="49" height="49" rx="11" fill="#3A2B46"/>
+    <!-- cream paper card -->
+    <rect x="6" y="7" width="49" height="49" rx="11" fill="#FFF6E4" stroke="#3A2B46" stroke-width="2.5"/>
+    <!-- hand-drawn fold glint, top-left -->
+    <path d="M13 19 q3 -5 8 -7" fill="none" stroke="#3A2B46" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+    <!-- warm gold V with plum ink outline -->
+    <path d="M18 19 L26.5 44 L31 50 L35.5 44 L44 19 L36.5 19 L31 36 L25.5 19 Z"
+          fill="#FFB63D" stroke="#3A2B46" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- tiny stitched star accent -->
+    <path d="M47 14 l1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 3.6 -1.6 Z"
+          fill="#FFF6E4" stroke="#3A2B46" stroke-width="1.6" stroke-linejoin="round"/>
+  </g>
+</svg>

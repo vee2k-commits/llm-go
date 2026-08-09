@@ -38,6 +38,9 @@ func New(addr string, b *bus.Bus, database *db.DB, reg *registry.Registry, cfg *
 	mux.Handle("/arcade/games/", http.StripPrefix("/arcade/games/", http.FileServer(http.Dir("web/arcade/games"))))
 	mux.HandleFunc("/partials/", apiPartials)
 	mux.HandleFunc("/static/", serveStatic)
+	mux.HandleFunc("/favicon.svg", serveFavicon)
+	mux.HandleFunc("/favicon.png", serveFavicon)
+	mux.HandleFunc("/favicon.ico", serveFavicon)
 	mux.HandleFunc("/", serveIndex)
 
 	return &http.Server{Addr: addr, Handler: mux}
@@ -67,6 +70,22 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write(data)
+}
+
+func serveFavicon(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Path {
+	case "/favicon.svg":
+		w.Header().Set("Content-Type", "image/svg+xml")
+		http.ServeFile(w, r, "web/favicon.svg")
+	case "/favicon.png":
+		w.Header().Set("Content-Type", "image/png")
+		http.ServeFile(w, r, "web/favicon.png")
+	case "/favicon.ico":
+		// Legacy browser probe: point it at the paper-craft PNG.
+		http.Redirect(w, r, "/favicon.png", http.StatusMovedPermanently)
+	default:
+		http.NotFound(w, r)
+	}
 }
 
 func serveStatic(w http.ResponseWriter, r *http.Request) {
