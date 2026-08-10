@@ -1,0 +1,118 @@
+:root {
+  color-scheme: dark;
+  color: #f8f8f2;
+  background: #0d1227;
+  font-family: Inter, system-ui, sans-serif;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top, #2a2d69 0%, #0c1024 36%, #04050d 100%);
+}
+.arcade-shell {
+  width: min(1100px, 95vw);
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 28px;
+  background: rgba(12, 18, 44, 0.92);
+  box-shadow: 0 40px 130px rgba(0,0,0,.35);
+  backdrop-filter: blur(12px);
+}
+.arcade-list-shell {
+  border-image: radial-gradient(circle at top left, #7c3aed, #0f172a) 1;
+}
+header {
+  margin-bottom: 20px;
+}
+header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  letter-spacing: -.04em;
+}
+header p {
+  margin: 12px 0 0;
+  color: #c8d0ff;
+  opacity: .9;
+}
+#game-list {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.game-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 24px;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,.28);
+  border-color: rgba(124, 58, 237, .45);
+}
+.game-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.game-card p {
+  margin: 0;
+  color: #d3d7ff;
+  opacity: .95;
+  line-height: 1.5;
+}
+.game-card a {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  background: linear-gradient(135deg, #a855f7, #4338ca);
+  color: white;
+  font-weight: 700;
+}
+.game-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.game-tag {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  color: #d3d7ff;
+  font-size: .82rem;
+}
+#game-container {
+  min-height: 620px;
+}.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #c8d0ff;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.back-link:hover {
+  color: #f8f8f2;
+}
+.loading-screen,
+.error {
+  padding: 28px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.07);
+  color: #f8f8f2;
+  text-align: center;
+  font-size: 1.1rem;
+}
+.error {
+  background: rgba(248,113,113,0.16);
+  color: #ffe3e3;
+}
