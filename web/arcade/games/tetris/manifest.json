@@ -1,0 +1,10 @@
+{
+  "id": "tetris",
+  "title": "Paper Stack",
+  "genre": "puzzle",
+  "engine": "vee",
+  "entry": "index.html",
+  "demo": "demo.html",
+  "license": "MIT",
+  "source": ""
+}

@@ -1,0 +1,10 @@
+{
+  "id": "sidescroller",
+  "title": "Sticker Safari",
+  "genre": "platformer",
+  "engine": "vee",
+  "entry": "index.html",
+  "demo": "demo.html",
+  "license": "MIT",
+  "source": ""
+}

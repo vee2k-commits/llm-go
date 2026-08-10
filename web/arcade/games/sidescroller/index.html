@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sticker Safari · Vee Arcade</title>
+<link rel="stylesheet" href="../engine/vee-style.css">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #F0F7E4; }
+  #stage { display: block; width: 100%; height: 100%; touch-action: none; }
+  #btnRow {
+    position: absolute; right: 14px; bottom: 14px; z-index: 20;
+    display: flex; gap: 10px;
+  }
+  #btnRow .vee-btn { min-width: 56px; min-height: 56px; font-size: 18px; padding: 8px 18px; }
+  .vee-card p { font-size: 18px; margin: 10px 0; }
+  .vee-card .vee-big { font-size: 24px; }
+  .vee-card .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  #resScore { font-size: 43px; font-variant-numeric: tabular-nums; }
+  .vee-hidden { display: none !important; }
+</style>
+</head>
+<body class="vee">
+<canvas id="stage"></canvas>
+
+<div id="btnRow">
+  <button id="btnPause" class="vee-btn vee-btn--ghost" type="button">⏸ Pause</button>
+  <button id="btnSound" class="vee-btn vee-btn--ghost" type="button">♪ Sound: On</button>
+  <button id="btnJuice"  class="vee-btn vee-btn--ghost" type="button">✦ Juice: Full</button>
+  <button id="btnQuit"  class="vee-btn vee-btn--berry" type="button">⏏ Quit</button>
+</div>
+
+<div id="startCard" class="vee-overlay">
+  <div class="vee-card vee-panel--taped" style="position:relative">
+    <h1>Sticker Safari</h1>
+    <p class="vee-big">Run with <b>Violet</b> through the paper meadows!</p>
+    <p>Hop, zoom and peel every sticker you find. She runs all by herself — you do the hopping!</p>
+    <p><span class="vee-badge vee-badge--sun">␣ SPACE or TAP = Hop</span>
+       <span class="vee-badge vee-badge--leaf">▲ Land ON brambles to boing!</span></p>
+    <div class="row">
+      <button id="btnStart" class="vee-btn" type="button">▶ Start the run</button>
+    </div>
+  </div>
+</div>
+
+<div id="pauseCard" class="vee-overlay vee-hidden">
+  <div class="vee-card">
+    <h2>Paused</h2>
+    <p>The paper world waits for you.</p>
+    <div class="row">
+      <button id="btnResume" class="vee-btn vee-btn--leaf" type="button">▶ Keep running</button>
+      <button id="btnPauseQuit" class="vee-btn vee-btn--ghost" type="button">⏏ Quit</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultCard" class="vee-overlay vee-hidden">
+  <div class="vee-card vee-panel--taped" style="position:relative">
+    <h2 id="resTitle">What a run!</h2>
+    <div id="resScore" class="vee-score">0</div>
+    <p id="resNew" class="vee-badge vee-badge--sun vee-hidden">★ New best!</p>
+    <p id="resLines">—</p>
+    <div class="row">
+      <button id="btnAgain" class="vee-btn" type="button">↻ Run again</button>
+      <button id="btnResultQuit" class="vee-btn vee-btn--ghost" type="button">⏏ Quit</button>
+    </div>
+  </div>
+</div>
+
+<script src="../engine/vee-game.js"></script>
+<script src="../engine/vee-sfx.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

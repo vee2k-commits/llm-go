@@ -1,0 +1,8 @@
+{
+  "id": "dressup",
+  "title": "Violet's Wardrobe",
+  "genre": "creative",
+  "engine": "vee",
+  "entry": "index.html",
+  "demo": "demo.html"
+}
