@@ -1,0 +1,10 @@
+{
+  "id": "frogger",
+  "title": "Puddle Hopper",
+  "genre": "arcade",
+  "engine": "vee",
+  "entry": "index.html",
+  "demo": "demo.html",
+  "license": "MIT",
+  "source": ""
+}

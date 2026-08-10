@@ -3,12 +3,25 @@
  *
  * Doctrine: cream paper, plum ink, pill buttons that physically press into
  * the paper, washi-tape panels, 18px floor, tabular-nums scores.
- * Offline requirement: NO external font downloads — Baloo 2 / Fredoka are
- * first choice (if locally installed) with rounded-system fallbacks only.
+ * Offline requirement: display face is BUNDLED (fonts/baloo2-600.woff2,
+ * SIL OFL 1.1 — see fonts/OFL.txt) so the HUD never collapses to generic
+ * sans on font-bare machines; rounded-system fallbacks follow.
+ * Relative url() from engine/ resolves for every game (all pages load
+ * ../engine/vee-style.css).
  *
  * BANNED here (hard): purple gradients, glassmorphism, browser-default
  * `ease`, `transition: all`, Inter/Roboto/Poppins, pure #000/#fff.
  * ========================================================================== */
+
+/* Bundled display face — Baloo 2 (Ek Type, OFL 1.1). Single 600 weight
+   covers the 600–800 weights used below; `swap` keeps first paint fast. */
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("fonts/baloo2-600.woff2") format("woff2");
+}
 
 :root {
   /* §3a — "Violet's Workshop" tokens (same values as vee-game.js DESIGN) */
@@ -23,7 +36,8 @@
   --berry:   #E0503C;
   --sky:     #7EB8F0;
 
-  /* §3e — two families total (2+1 rule); rounded-system fallback stack */
+  /* §3e — two families total (2+1 rule); bundled Baloo 2 leads, then
+     rounded-system fallbacks for offline/font-bare environments */
   --font-display: "Baloo 2", "Fredoka", "Comic Sans MS", "Chalkboard SE",
                   "Comic Neue", "Segoe UI", system-ui, sans-serif;
   --font-body:    "Fredoka", "Baloo 2", "Comic Sans MS", "Chalkboard SE",
