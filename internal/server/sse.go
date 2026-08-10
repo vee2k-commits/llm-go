@@ -22,10 +22,11 @@ type Hub struct {
 
 func NewHub(b *bus.Bus) *Hub {
 	return &Hub{
-		bus:       b,
-		clients:   map[*client]bool{},
+		bus:     b,
+		clients: map[*client]bool{},
 		stateKeys: []string{
 			"state.layer",
+			"state.arcade",
 			"state.audio",
 			"state.chat",
 			"state.settings",

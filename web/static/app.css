@@ -24,6 +24,16 @@
   --arcade-neon: #c026ff;
 }
 
+/* The arcade is available before any game iframe opens, so its display face
+   is loaded here as well as in the game engine stylesheet. */
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/arcade/games/engine/fonts/baloo2-600.woff2") format("woff2");
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -249,132 +259,161 @@ input[type="checkbox"].setting-input {
 }
 
 #arcade-overlay {
-  background: var(--arcade-bg);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 16px;
-  align-content: flex-start;
+  --paper: #fff6e4;
+  --paper-2: #f7e9ce;
+  --paper-3: #eddab6;
+  --ink: #3a2b46;
+  --ink-soft: #5c4a6e;
+  --violet: #8a5bd6;
+  --sun: #ffb63d;
+  --leaf: #4fbe6a;
+  --berry: #e0503c;
+  --sky: #7eb8f0;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255, 182, 61, .16) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 80% 70%, rgba(138, 91, 214, .1) 0 1px, transparent 1.5px);
+  background-size: 19px 19px, 13px 13px;
+  color: var(--ink);
+  font-family: "Baloo 2", "Comic Sans MS", "Chalkboard SE", system-ui, sans-serif;
+  overflow: hidden;
 }
 
-#arcade-overlay[data-game] { background: var(--arcade-bg); }
-
-#arcade-content { width: 100%; height: 100%; }
-
-.game-shelf {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  padding: 8px;
-  align-content: start;
+#arcade-content {
+  width: min(1240px, 100%);
   height: 100%;
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 42px) clamp(16px, 4vw, 56px) 38px;
   overflow-y: auto;
+  scrollbar-color: var(--violet) var(--paper-2);
 }
 
-.game-shelf.shelf-highlight {
-  outline: 2px solid var(--arcade-neon);
-  box-shadow: 0 0 24px var(--arcade-neon);
-  border-radius: var(--radius-lg);
+.arcade-head { margin-bottom: 22px; }
+.arcade-kicker {
+  display: inline-block;
+  padding: 5px 12px 4px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--sun);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  transform: rotate(-1.4deg);
 }
+.arcade-head-row { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-top: 13px; }
+.arcade-head h1, .arcade-head h2, .arcade-welcome h2, .arcade-shelf-heading h2 { margin: 0; font-weight: 800; line-height: .95; }
+.arcade-head h1 { max-width: 760px; font-size: clamp(36px, 5vw, 66px); letter-spacing: -.035em; }
+.arcade-head p { max-width: 720px; margin: 12px 0 0; color: var(--ink-soft); font-family: "Trebuchet MS", system-ui, sans-serif; font-size: 18px; line-height: 1.45; }
+.arcade-dismiss, .game-close, .choice-btn {
+  min-width: 56px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-2);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  font: 800 16px/1 "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+  transition: transform 120ms cubic-bezier(.16,1,.3,1), box-shadow 120ms cubic-bezier(.16,1,.3,1), background-color 120ms cubic-bezier(.16,1,.3,1);
+}
+.arcade-dismiss:hover, .game-close:hover, .choice-btn:hover { background: var(--sky); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.arcade-dismiss:active, .game-close:active, .choice-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
 
+.arcade-welcome {
+  position: relative;
+  min-height: 235px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 28px clamp(22px, 4vw, 52px);
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  background: var(--sky);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.arcade-welcome::before, .arcade-welcome::after { content: ""; position: absolute; border: 2px solid var(--ink); background: var(--paper); opacity: .88; }
+.arcade-welcome::before { width: 86px; height: 33px; right: 39%; top: 26px; border-radius: 50% 44% 48% 42%; transform: rotate(-6deg); }
+.arcade-welcome::after { width: 135px; height: 39px; right: 11%; bottom: 25px; border-radius: 52% 46% 44% 51%; transform: rotate(5deg); }
+.arcade-welcome-copy { position: relative; z-index: 2; max-width: 450px; }
+.arcade-badge { display: inline-block; padding: 5px 10px; border-radius: 999px; background: var(--paper); border: 2px solid var(--ink); font-size: 14px; font-weight: 800; }
+.arcade-welcome h2 { margin-top: 14px; font-size: clamp(30px, 4vw, 49px); }
+.arcade-welcome p { margin: 10px 0 0; font: 700 18px/1.35 "Trebuchet MS", system-ui, sans-serif; }
+.arcade-friends { position: absolute; z-index: 1; right: clamp(8px, 3vw, 38px); bottom: 0; width: min(54%, 560px); height: 100%; pointer-events: none; }
+.arcade-friend { position: absolute; bottom: -10px; margin: 0; overflow: hidden; border: 2px solid var(--ink); border-radius: 16px 16px 0 0; background: var(--paper); box-shadow: 3px 3px 0 var(--ink); }
+.arcade-friend img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.arcade-friend--violet { z-index: 3; right: 27%; width: 150px; height: 214px; transform: rotate(2.5deg); }
+.arcade-friend--flex { z-index: 2; right: 0; width: 120px; height: 154px; transform: rotate(6deg); }
+.arcade-friend--kellee { z-index: 1; right: 49%; width: 115px; height: 151px; transform: rotate(-7deg); }
+
+.arcade-shelf-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; margin: 42px 0 16px; }
+.arcade-shelf-heading h2 { font-size: clamp(27px, 3vw, 38px); }
+.arcade-shelf-heading p { margin: 0; color: var(--ink-soft); font: 700 16px/1.35 "Trebuchet MS", system-ui, sans-serif; }
+.game-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 19px; padding: 0 3px 8px 0; }
+.game-shelf.shelf-highlight { outline: 3px solid var(--sun); outline-offset: 8px; border-radius: 18px; }
 .game-tile {
-  background: var(--color-panel);
-  border: 1px solid var(--arcade-neon);
-  border-radius: var(--radius);
-  padding: 14px;
+  --tile: var(--violet);
+  position: relative;
+  min-height: 288px;
+  display: grid;
+  grid-template-rows: 123px auto 1fr auto;
+  align-items: start;
+  gap: 8px;
+  padding: 12px 13px 13px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper-2);
+  box-shadow: 4px 4px 0 var(--ink);
+  color: var(--ink);
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  text-align: left;
+  font-family: inherit;
+  transition: transform 180ms cubic-bezier(.34,1.56,.64,1), box-shadow 180ms cubic-bezier(.16,1,.3,1);
 }
+.game-tile::after { content: ""; position: absolute; top: -10px; right: 14px; width: 50px; height: 22px; border-left: 2px solid rgba(58,43,70,.3); border-right: 2px solid rgba(58,43,70,.3); background: rgba(255,246,228,.64); transform: rotate(5deg); }
+.game-tile:hover { transform: translate(-2px, -5px) rotate(-.5deg); box-shadow: 7px 10px 0 var(--ink); }
+.game-tile:focus-visible, .arcade-dismiss:focus-visible, .game-close:focus-visible, .choice-btn:focus-visible { outline: 3px solid var(--berry); outline-offset: 3px; }
+.game-tile:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink); }
+.game-art { position: relative; overflow: hidden; width: 100%; height: 123px; border: 2px solid var(--ink); border-radius: 10px; background: var(--tile); }
+.game-art::before, .game-art::after { content: ""; position: absolute; border: 2px solid var(--ink); background: var(--paper); }
+.game-art::before { width: 58px; height: 58px; left: 18px; bottom: -20px; border-radius: 50%; box-shadow: 48px -9px 0 -8px var(--paper), 96px 11px 0 -5px var(--paper); }
+.game-art::after { width: 122%; height: 35px; bottom: -20px; left: -8%; border-radius: 50% 50% 0 0; background: var(--paper-3); transform: rotate(-2deg); }
+.game-art-icon { position: absolute; z-index: 2; top: 15px; left: 15px; max-width: 128px; padding: 5px 9px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); box-shadow: 2px 2px 0 var(--ink); font-size: 16px; font-weight: 800; line-height: 1; transform: rotate(-3deg); }
+.game-title { padding: 3px 2px 0; font-size: 24px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.game-meta { padding: 0 2px; color: var(--ink-soft); font: 700 15px/1.35 "Trebuchet MS", system-ui, sans-serif; }
+.game-cta { justify-self: start; padding: 6px 11px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); font-size: 15px; font-weight: 800; }
+.game-tile--arkanoid { --tile: var(--sun); }
+.game-tile--tetris { --tile: var(--leaf); }
+.game-tile--frogger { --tile: var(--sky); }
+.game-tile--mario { --tile: #ec9d75; }
+.game-tile--racer { --tile: #d8b67d; }
+.game-tile--sidescroller { --tile: #8fcf75; }
+.game-tile--dressup { --tile: #e598bd; }
+.arcade-empty { grid-column: 1 / -1; padding: 48px; border: 2px dashed var(--ink-soft); border-radius: 16px; color: var(--ink-soft); text-align: center; font: 700 18px/1.4 "Trebuchet MS", system-ui, sans-serif; }
 
-.game-tile:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 16px var(--arcade-neon);
-}
+.arcade-choice { position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 18px; background: rgba(58,43,70,.42); }
+.choice-btn { background: var(--paper); }
+.game-frame { display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; border: 2px solid var(--ink); border-radius: 18px; background: var(--paper); box-shadow: 6px 6px 0 var(--ink); }
+.game-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 12px 9px 17px; border-bottom: 2px solid var(--ink); background: var(--paper-2); }
+.game-bar-title { color: var(--ink); font: 800 clamp(18px, 2.2vw, 26px)/1 "Baloo 2", "Comic Sans MS", system-ui, sans-serif; }
+.game-close { min-height: 42px; padding: 7px 13px; font-size: 15px; }
+.game-iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: var(--paper); }
 
-.game-title {
-  color: var(--arcade-neon);
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.game-meta {
-  color: var(--color-muted);
-  font-size: 0.8em;
-  margin-top: 4px;
-}
-
-.arcade-empty {
-  grid-column: 1 / -1;
-  color: var(--color-muted);
-  text-align: center;
-  padding: 40px 0;
-}
-
-.arcade-choice {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  background: rgba(10,1,20,0.75);
-  z-index: 5;
-}
-
-.choice-btn {
-  background: var(--color-panel);
-  color: var(--arcade-neon);
-  border: 1px solid var(--arcade-neon);
-  border-radius: var(--radius);
-  padding: 14px 28px;
-  font-family: var(--font-family);
-  font-size: 1.05em;
-  cursor: pointer;
-  transition: box-shadow 0.15s;
-}
-
-.choice-btn:hover { box-shadow: 0 0 18px var(--arcade-neon); }
-
-.game-frame {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
-
-.game-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--arcade-neon);
-}
-
-.game-bar-title {
-  color: var(--arcade-neon);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.game-close {
-  background: none;
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
-  border-radius: var(--btn-radius);
-  font-size: 16px;
-  line-height: 1;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-
-.game-close:hover { box-shadow: 0 0 10px var(--color-accent); }
-
-.game-iframe {
-  flex: 1;
-  width: 100%;
-  border: none;
-  background: #000;
+@media (max-width: 700px) {
+  #arcade-content { padding: 22px 18px 28px; }
+  .arcade-head-row, .arcade-shelf-heading { align-items: flex-start; flex-direction: column; }
+  .arcade-dismiss { align-self: flex-end; margin-top: -50px; }
+  .arcade-welcome { min-height: 356px; align-items: flex-start; }
+  .arcade-friends { right: 7px; width: 95%; height: 195px; }
+  .arcade-friend--violet { right: 28%; width: 130px; height: 188px; }
+  .arcade-friend--flex { width: 98px; height: 125px; }
+  .arcade-friend--kellee { right: 58%; width: 94px; height: 124px; }
+  .game-shelf { grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 14px; }
+  .game-tile { min-height: 268px; grid-template-rows: 112px auto 1fr auto; }
+  .game-art { height: 112px; }
 }
 
 #wizard-overlay {

@@ -442,6 +442,40 @@ function bakePreview(ti) {
  * ------------------------------------------------------------------------ */
 var kartSprites = {}, portraitSprites = {}, chipSprites = {};
 
+/* User-supplied character art belongs in the game, too.  The moving karts
+ * remain purpose-built cut-paper sprites for legibility at speed, while these
+ * source portraits make the character-select screen feel like a real cast
+ * board rather than a menu of anonymous tokens.  `solo.png` is intentionally
+ * used here instead of slicing the reference sheets: their metadata describes
+ * character poses, not a uniform in-game animation strip. */
+var sourcePortraits = {};
+[
+  ["violet", "/static/assets/characters/violet/solo.png"],
+  ["flex", "/static/assets/characters/frogmaster-flex/solo.png"],
+  ["kellee", "/static/assets/characters/princess-kellee/solo.png"]
+].forEach(function (entry) {
+  var img = new Image();
+  img.src = entry[1];
+  sourcePortraits[entry[0]] = img;
+});
+
+function drawSourcePortrait(g, id, x, y, w, h) {
+  var img = sourcePortraits[id];
+  if (!img || !img.complete || !img.naturalWidth) return false;
+  g.save();
+  g.beginPath(); g.roundRect(x, y, w, h, 10); g.clip();
+  /* Preserve each illustrator's intended framing, with a slight zoom to
+     favour faces inside the paper-card window. */
+  var sw = img.naturalWidth, sh = img.naturalHeight;
+  var scale = Math.max(w / sw, h / sh) * 1.09;
+  var dw = sw * scale, dh = sh * scale;
+  g.drawImage(img, x + (w - dw) / 2, y + (h - dh) * 0.26, dw, dh);
+  g.restore();
+  g.lineWidth = 2; g.strokeStyle = C.ink;
+  g.beginPath(); g.roundRect(x, y, w, h, 10); g.stroke();
+  return true;
+}
+
 function decalPath(g, kind, s) {             /* s = size multiplier          */
   g.beginPath();
   var i, a, r;
@@ -1547,8 +1581,11 @@ function drawSelect() {
       ctx.strokeStyle = C.sun; ctx.lineWidth = 3.5;
       ctx.beginPath(); ctx.roundRect(-cw2 / 2 - 3, -ch2 / 2 - 3, cw2 + 6, ch2 + 6, 15); ctx.stroke();
     }
-    /* big portrait */
-    ctx.drawImage(portraitSprites[ch.id], -58, -ch2 / 2 + 22, 116, 116);
+    /* Big portrait: the supplied cast art is framed like a collectible card;
+       Wind-Up Tin remains a purpose-drawn toy. */
+    if (!drawSourcePortrait(ctx, ch.id, -58, -ch2 / 2 + 22, 116, 116)) {
+      ctx.drawImage(portraitSprites[ch.id], -58, -ch2 / 2 + 22, 116, 116);
+    }
     text(ch.name, 0, 58, 20, "800 20px " + FDISP, C.ink);
     /* stat stickers: Speed / Grip as 1–3 stars */
     text("Speed", -62, 92, 18, "600 18px " + FBODY, C.inkSoft, "left");

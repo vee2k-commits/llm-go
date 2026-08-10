@@ -24,6 +24,13 @@
     if (topic === "state.settings") { state.settings = payload || {}; }
     if (topic === "settings.changed" && payload) { state.settings[payload.key] = payload.value; }
     if (topic === "state.registry.game") { state.registry.games = payload || []; renderGameShelf(); }
+    // `screensaver.activated` is an event, so a browser opened while the
+    // arcade is already running would otherwise miss it.  The state mirror
+    // makes the Paper Playground reliable on reconnect as well.
+    if (topic === "state.arcade") {
+      if (payload && payload.active) onScreensaverActivated();
+      else onScreensaverDeactivated();
+    }
     if (topic === "notify.push") { renderToast(payload); }
     if (topic === "chat.message" || topic === "chat.token" || topic === "chat.ended") { renderChatEvent(topic, payload); }
     if (topic === "layer.activated") { onLayerActivated(payload); }
@@ -237,14 +244,85 @@
 
   // -------------------------------------------------------------- arcade
 
+  var ARCADE_ART = {
+    arkanoid: "Craft Breaker",
+    tetris: "Paper Stack",
+    frogger: "Puddle Hopper",
+    mario: "Big Fold-Out",
+    racer: "Grand Prix",
+    sidescroller: "Sticker Safari",
+    dressup: "Wardrobe"
+  };
+
+  var ARCADE_BLURBS = {
+    arkanoid: "Bounce a paper ball through Violet's craft-table bricks.",
+    tetris: "Stack gift-box pieces and fold bright rows into airplanes.",
+    frogger: "Help Violet hop across toy roads and tissue-paper water.",
+    mario: "Leap through a pop-up-book world full of friendly surprises.",
+    racer: "Race wind-up toys around a cheerful cardboard track.",
+    sidescroller: "Run, hop and peel new friends into your sticker book.",
+    dressup: "Make a look, save a Polaroid and share the sparkle."
+  };
+  var PAPER_PLAYGROUND_IDS = {
+    arkanoid: true, tetris: true, frogger: true, mario: true,
+    racer: true, sidescroller: true, dressup: true
+  };
+
+  function arcadeLabel(entry) {
+    return entry.name || entry.title || entry.id || "New game";
+  }
+
+  function arcadeMeta(entry) {
+    return (entry.meta && (entry.meta.genre || entry.meta.engine)) || entry.description || "Paper playground";
+  }
+
   function renderGameShelf() {
     var content = document.getElementById("arcade-content");
     if (!content || gameActive) return;
     content.innerHTML = "";
+
+    var header = document.createElement("header");
+    header.className = "arcade-head";
+    header.innerHTML =
+      '<div class="arcade-kicker">Vee’s paper playground</div>' +
+      '<div class="arcade-head-row">' +
+        '<div><h1>Pick a little adventure</h1><p>Every game is made for curious hands: kind challenges, big celebrations and plenty of room to play.</p></div>' +
+        '<button class="arcade-dismiss" type="button" aria-label="Close arcade">Close</button>' +
+      '</div>';
+    content.appendChild(header);
+
+    var welcome = document.createElement("section");
+    welcome.className = "arcade-welcome";
+    welcome.setAttribute("aria-label", "Meet the arcade friends");
+    welcome.innerHTML =
+      '<div class="arcade-welcome-copy">' +
+        '<span class="arcade-badge">★ 7 handmade games</span>' +
+        '<h2>Violet saved you a seat.</h2>' +
+        '<p>Collect stickers, discover new outfits, and keep every good try.</p>' +
+      '</div>' +
+      '<div class="arcade-friends">' +
+        '<figure class="arcade-friend arcade-friend--violet"><img src="/static/assets/characters/violet/solo.png" alt="Violet, the arcade adventurer"></figure>' +
+        '<figure class="arcade-friend arcade-friend--flex"><img src="/static/assets/characters/frogmaster-flex/solo.png" alt="Frogmaster Flex"></figure>' +
+        '<figure class="arcade-friend arcade-friend--kellee"><img src="/static/assets/characters/princess-kellee/solo.png" alt="Princess Kellee"></figure>' +
+      '</div>';
+    content.appendChild(welcome);
+
+    var shelfHeading = document.createElement("div");
+    shelfHeading.className = "arcade-shelf-heading";
+    shelfHeading.innerHTML = '<h2 id="arcade-games-heading">Choose a game</h2><p>Arrow keys and touch both work in every adventure.</p>';
+    content.appendChild(shelfHeading);
+
     var shelf = document.createElement("div");
     shelf.className = "game-shelf";
     shelf.id = "game-shelf";
-    var games = state.registry.games || [];
+    shelf.setAttribute("aria-labelledby", "arcade-games-heading");
+    // The registry can retain legacy game entries from older Vee installs.
+    // The Paper Playground is a deliberately curated seven-game collection;
+    // don't put stale cartridges on the new shelf where their files no longer
+    // exist and a young player can accidentally choose one.
+    var games = (state.registry.games || []).filter(function(entry) {
+      return !!PAPER_PLAYGROUND_IDS[entry.id];
+    });
     if (!games.length) {
       var empty = document.createElement("div");
       empty.className = "arcade-empty";
@@ -252,23 +330,42 @@
       shelf.appendChild(empty);
     }
     games.forEach(function(entry) {
-      var tile = document.createElement("div");
-      tile.className = "game-tile";
+      var tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "game-tile game-tile--" + (entry.id || "new");
       tile.setAttribute("data-game", entry.id);
+      tile.setAttribute("aria-label", "Play " + arcadeLabel(entry));
+      var art = document.createElement("div");
+      art.className = "game-art";
+      art.setAttribute("aria-hidden", "true");
+      var icon = document.createElement("span");
+      icon.className = "game-art-icon";
+      icon.textContent = ARCADE_ART[entry.id] || "Play";
+      art.appendChild(icon);
       var title = document.createElement("div");
       title.className = "game-title";
-      title.textContent = entry.name || entry.id;
+      title.textContent = arcadeLabel(entry);
       var meta = document.createElement("div");
       meta.className = "game-meta";
-      var bits = [];
-      if (entry.description) bits.push(entry.description);
-      if (entry.meta && entry.meta.engine) bits.push(entry.meta.engine);
-      meta.textContent = bits.join(" · ");
+      meta.textContent = ARCADE_BLURBS[entry.id] || arcadeMeta(entry);
+      var cta = document.createElement("span");
+      cta.className = "game-cta";
+      cta.textContent = "Play now";
+      tile.appendChild(art);
       tile.appendChild(title);
       tile.appendChild(meta);
+      tile.appendChild(cta);
       shelf.appendChild(tile);
     });
     content.appendChild(shelf);
+
+    var dismiss = header.querySelector(".arcade-dismiss");
+    if (dismiss) dismiss.addEventListener("click", function(ev) {
+      ev.stopPropagation();
+      var overlay = document.getElementById("arcade-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      fetch("/api/arcade/dismiss", { method: "POST" }).catch(function() {});
+    });
   }
 
   function showArcadeChoice() {
@@ -323,7 +420,7 @@
     name.textContent = title + (demo ? " — demo" : "");
     var close = document.createElement("button");
     close.className = "game-close";
-    close.textContent = "×";
+    close.textContent = "Back to shelf";
     close.title = "Close";
     close.addEventListener("click", function(ev) {
       ev.stopPropagation();
